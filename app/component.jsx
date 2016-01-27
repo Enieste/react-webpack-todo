@@ -16,7 +16,7 @@ const TODO = React.createClass({
         this.setState({items: this.state.items.concat([item])});
     },
     render() {
-        return <div className="todo col-md-4 col-md-offset-4">
+        return <div className="todo col-md-4 col-md-offset-4 col-xs-4 col-xs-offset-4">
             <TodoBanner count={this.state.items.length} deleteAll={this.deleteAll}/>
             <TodoList items={this.state.items} handleDelete={this.handleDelete}/>
             <TodoForm onFormSubmit={this.addItem}/>
@@ -27,7 +27,10 @@ const TODO = React.createClass({
 const TodoBanner = React.createClass({
     render() {
         return (
-            <h3>TODO list ({this.props.count}) {this.props.count ? <button onClick={this.props.deleteAll} className="btn btn-warning">Forget all</button> : false}</h3>
+            <h3>TODO list ({this.props.count}) {this.props.count ?
+                <button onClick={this.props.deleteAll} className="btn btn-warning">Forget all</button> :
+                false}
+            </h3>
         );
     }
 });
@@ -68,8 +71,10 @@ const TodoForm = React.createClass({
             <form onSubmit={this.handleSubmit}>
                 <div className="form-group">
                     <label>Add todo:</label>
-                    <input type="text" className="form-control" ref="item" onChange={this.onChange} value={this.state.item}/>
-                    <input type="submit" className="form-control btn btn-success" value="Do"/>
+                    <input type="text" className="form-control" ref="item" onChange={this.onChange}
+                           value={this.state.item}/>
+                    <input type="submit" className="todo-submit-button btn btn-success" value="Do"
+                           disabled={this.state.item.replace(/ /g, '').length === 0}/>
                 </div>
             </form>
         </div>

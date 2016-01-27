@@ -3,3 +3,7 @@
 body {
     background-color: #e0d5ff;
 }
+
+.todo-submit-button {
+    width: 100%;
+}
