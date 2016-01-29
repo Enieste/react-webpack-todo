@@ -1,19 +1,34 @@
 'use strict';
 
 import React from 'react';
+import ReactDOM from 'react-dom';
+import apiTools from './apiTools';
 
 const TODO = React.createClass({
     getInitialState() {
         return {items: []};
     },
-    handleDelete(i) {
-        this.setState({items: this.state.items.filter((item, _i) => _i !== i)});
+    handleDelete(id) {
+        apiTools.todos.remove(id, () => {
+            this.setState({items: this.state.items.filter((item) => id !== item.id)});
+        });
     },
     deleteAll() {
-        this.setState({items: []});
+        apiTools.todos.removeAll(() => this.setState({items: []}));
     },
     addItem(item) {
-        this.setState({items: this.state.items.concat([item])});
+        apiTools.todos.add({text: item}, (res) => {
+            this.setState({
+                items: this.state.items.concat([{text: item, id: res.id}])
+            });
+        });
+    },
+    componentDidMount() {
+        apiTools.todos.list((res) => {
+            that.setState({items: res});
+        });
+        var that = this;
+
     },
     render() {
         return <div className="todo col-md-4 col-md-offset-4 col-xs-4 col-xs-offset-4">
@@ -38,8 +53,8 @@ const TodoBanner = React.createClass({
 const TodoList = React.createClass({
     render() {
         return <ul>
-            {this.props.items.map((itemText, i) =>
-                <TodoListItem deleteClicked={() => this.props.handleDelete(i)} text={itemText}/>
+            {this.props.items.map(todoItem =>
+                <TodoListItem key={todoItem.id} deleteClicked={() => this.props.handleDelete(todoItem.id)} text={todoItem.text}/>
             )}
         </ul>;
     }
@@ -59,7 +74,7 @@ const TodoForm = React.createClass({
         e.preventDefault();
         this.props.onFormSubmit(this.state.item);
         this.setState({item: ''});
-        React.findDOMNode(this.refs.item).focus();
+        ReactDOM.findDOMNode(this.refs.item).focus();
     },
     onChange(e) {
         this.setState({
