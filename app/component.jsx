@@ -28,7 +28,6 @@ const TODO = React.createClass({
             that.setState({items: res});
         });
         var that = this;
-
     },
     render() {
         return <div className="todo col-md-4 col-md-offset-4 col-xs-4 col-xs-offset-4">
