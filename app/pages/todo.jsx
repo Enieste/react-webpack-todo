@@ -2,37 +2,57 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import apiTools from './apiTools';
+import apiTools from '../apiTools';
+import { connect } from 'react-redux';
 
-const TODO = React.createClass({
+const mapStateToProps = (state) => {
+    return {
+        items: state.todos
+    }
+};
+
+let TODO = React.createClass({
     getInitialState() {
-        return {items: []};
+        return {loaded: false};
     },
     handleDelete(id) {
-        apiTools.todos.remove(id, () => {
-            this.setState({items: this.state.items.filter((item) => id !== item.id)});
+        apiTools.todos.remove(id).then(_ => {
+            this.props.dispatch({
+               type: 'DELETE_TODO',
+               id
+            });
         });
     },
     deleteAll() {
-        apiTools.todos.removeAll(() => this.setState({items: []}));
+        apiTools.todos.removeAll().then(_ =>
+            this.props.dispatch({
+                type: 'DELETE_ALL'
+            }));
     },
     addItem(item) {
-        apiTools.todos.add({text: item}, (res) => {
-            this.setState({
-                items: this.state.items.concat([{text: item, id: res.id}])
+        apiTools.todos.add({text: item}).then((res) => {
+            this.props.dispatch({
+                type: 'ADD_TODO',
+                id: res.id,
+                text: item
             });
         });
     },
     componentDidMount() {
-        apiTools.todos.list((res) => {
-            that.setState({items: res});
+        apiTools.todos.list().then((res) => {
+            this.setState({loaded: true});
+            this.props.dispatch({
+                type: 'LOAD_TODOS',
+                todos: res
+            });
         });
-        var that = this;
     },
     render() {
         return <div className="todo col-md-4 col-md-offset-4 col-xs-4 col-xs-offset-4">
-            <TodoBanner count={this.state.items.length} deleteAll={this.deleteAll}/>
-            <TodoList items={this.state.items} handleDelete={this.handleDelete}/>
+            <TodoBanner count={this.props.items.length} deleteAll={this.deleteAll}/>
+            {this.state.loaded ?
+                <TodoList items={this.props.items} handleDelete={this.handleDelete}/> :
+                <p>Loading...</p> }
             <TodoForm onFormSubmit={this.addItem}/>
         </div>;
     }
@@ -73,7 +93,7 @@ const TodoForm = React.createClass({
         e.preventDefault();
         this.props.onFormSubmit(this.state.item);
         this.setState({item: ''});
-        ReactDOM.findDOMNode(this.refs.item).focus();
+        this.todoTextNode.focus();
     },
     onChange(e) {
         this.setState({
@@ -85,7 +105,7 @@ const TodoForm = React.createClass({
             <form onSubmit={this.handleSubmit}>
                 <div className="form-group">
                     <label>Add todo:</label>
-                    <input type="text" className="form-control" ref="item" onChange={this.onChange}
+                    <input type="text" className="form-control" ref={node => this.todoTextNode = node} onChange={this.onChange}
                            value={this.state.item}/>
                     <input type="submit" className="todo-submit-button btn btn-success" value="Do"
                            disabled={this.state.item.replace(/ /g, '').length === 0}/>
@@ -95,21 +115,14 @@ const TodoForm = React.createClass({
     }
 });
 
-const Application = React.createClass({
-    getInitialState() {
-        return {count: 6};
-    },
-    onCountChange(e) {
-        console.log(e);
-        this.setState({
-            count: e.target.value
-        });
-    },
+const TodoPage = React.createClass({
     render() {
         return <div className="application">
-            <TODO/>
+            <TODO />
         </div>;
     }
 });
 
-export default Application;
+TODO = connect(mapStateToProps)(TODO);
+
+export default TodoPage;

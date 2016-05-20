@@ -3,11 +3,32 @@
 import './main.css';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './component.jsx';
+import { render } from 'react-dom';
+import { Router, Route, Link, hashHistory } from 'react-router';
+import { syncHistoryWithStore, routerMiddleware } from 'react-router-redux';
+import { createStore, combineReducers, applyMiddleware } from 'redux';
+import { Provider } from 'react-redux';
+import TodoPage from './pages/todo.jsx';
+import HomePage from './pages/home.jsx';
+import SignIn from './pages/signIn.jsx';
+import SignUp from './pages/signUp.jsx';
+import appReducers from './reducers';
 
-main();
+const store = createStore(
+    appReducers,
+    applyMiddleware(routerMiddleware(hashHistory))
+);
 
-function main() {
-    ReactDOM.render(<App />, document.getElementById('app'));
-}
+const history = syncHistoryWithStore(hashHistory, store);
+
+render((
+    <Provider store={store}>
+        <Router history={history}>
+            <Route path="/" component={HomePage}>
+                <Route path="signIn" component={SignIn} />
+                <Route path="signUp" component={SignUp} />
+                <Route path="todo" component={TodoPage} />
+            </Route>
+        </Router>
+    </Provider>
+), document.querySelector('#app'));

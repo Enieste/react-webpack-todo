@@ -2,22 +2,36 @@
 
 import networkTools from './networkTools';
 
-const root = 'http://192.168.0.103:8000';
+const root = 'https://portfolio-todo-backend.herokuapp.com';
 
 const apiTools = {
     todos: {
-        list(cb) {
-            networkTools.get(`${root}/todos`, cb);
+        list() {
+            return networkTools.get(`${root}/todos`);
         },
-        add(todo, cb) {
-            networkTools.post(`${root}/todos`, todo, cb);
+        add(todo) {
+            return networkTools.post(`${root}/todos`, todo);
         },
-        remove(id, cb) {
-            networkTools.del(`${root}/todos/${id}`, cb);
+        remove(id) {
+            return networkTools.del(`${root}/todos/${id}`);
         },
-        removeAll(cb) {
-            networkTools.del(`${root}/todos`, cb);
+        removeAll() {
+            return networkTools.del(`${root}/todos`);
         }
+    },
+    auth: {
+        signIn(login, password) {
+            return networkTools.post(`${root}/signIn`, {login, password}).then(r => r.user);
+        },
+        session() {
+            return networkTools.get(`${root}/session`).then(r => r.user);
+        },
+        signOut() {
+            return networkTools.get(`${root}/signOut`);
+        },
+        signUp(login, email, password) {
+            return networkTools.post(`${root}/signUp`, {login, email, password}).then(r => r.user);
+}
     }
 };
 
